@@ -268,6 +268,13 @@ ifeq ($(SDCLANG),true)
     endif
 endif
 
+# Export compiler type for display
+ifneq ($(my_clang),true)
+    my_compiler := gcc
+else
+    my_compiler := clang
+endif
+
 # arch-specific static libraries go first so that generic ones can depend on them
 my_static_libraries := $(LOCAL_STATIC_LIBRARIES_$($(my_prefix)$(LOCAL_2ND_ARCH_VAR_PREFIX)ARCH)) $(LOCAL_STATIC_LIBRARIES_$(my_32_64_bit_suffix)) $(my_static_libraries)
 my_whole_static_libraries := $(LOCAL_WHOLE_STATIC_LIBRARIES_$($(my_prefix)$(LOCAL_2ND_ARCH_VAR_PREFIX)ARCH)) $(LOCAL_WHOLE_STATIC_LIBRARIES_$(my_32_64_bit_suffix)) $(my_whole_static_libraries)
@@ -692,6 +699,7 @@ endif  # transform-proto-to-cc rule included only once
 
 $(proto_generated_objects): PRIVATE_ARM_MODE := $(normal_objects_mode)
 $(proto_generated_objects): PRIVATE_ARM_CFLAGS := $(normal_objects_cflags)
+$(proto_generated_objects): PRIVATE_COMPILER_ID := $(my_compiler)
 $(proto_generated_objects): $(proto_generated_obj_dir)/%.o: $(proto_generated_sources_dir)/%$(my_proto_source_suffix) $(proto_generated_headers)
 ifeq ($(my_proto_source_suffix),.c)
 	$(transform-$(PRIVATE_HOST)c-to-o)
@@ -934,8 +942,10 @@ $(call track-src-file-obj,$(cpp_normal_sources),$(cpp_normal_objects))
 
 $(dotdot_arm_objects) $(cpp_arm_objects): PRIVATE_ARM_MODE := $(arm_objects_mode)
 $(dotdot_arm_objects) $(cpp_arm_objects): PRIVATE_ARM_CFLAGS := $(arm_objects_cflags)
+$(dotdot_arm_objects) $(cpp_arm_objects): PRIVATE_COMPILER_ID := $(my_compiler)
 $(dotdot_objects) $(cpp_normal_objects): PRIVATE_ARM_MODE := $(normal_objects_mode)
 $(dotdot_objects) $(cpp_normal_objects): PRIVATE_ARM_CFLAGS := $(normal_objects_cflags)
+$(dotdot_objects) $(cpp_normal_objects): PRIVATE_COMPILER_ID := $(my_compiler)
 
 cpp_objects        := $(cpp_arm_objects) $(cpp_normal_objects)
 
@@ -963,6 +973,7 @@ ifneq ($(strip $(gen_cpp_objects)),)
 # TODO: support compiling certain generated files as arm.
 $(gen_cpp_objects): PRIVATE_ARM_MODE := $(normal_objects_mode)
 $(gen_cpp_objects): PRIVATE_ARM_CFLAGS := $(normal_objects_cflags)
+$(gen_cpp_objects): PRIVATE_COMPILER_ID := $(my_compiler)
 $(gen_cpp_objects): $(intermediates)/%.o: \
     $(intermediates)/%$(LOCAL_CPP_EXTENSION) $(yacc_cpps) \
     $(proto_generated_headers) \
@@ -1038,8 +1049,10 @@ $(call track-src-file-obj,$(c_normal_sources),$(c_normal_objects))
 
 $(dotdot_arm_objects) $(c_arm_objects): PRIVATE_ARM_MODE := $(arm_objects_mode)
 $(dotdot_arm_objects) $(c_arm_objects): PRIVATE_ARM_CFLAGS := $(arm_objects_cflags)
+$(dotdot_arm_objects) $(c_arm_objects): PRIVATE_COMPILER_ID := $(my_compiler)
 $(dotdot_objects) $(c_normal_objects): PRIVATE_ARM_MODE := $(normal_objects_mode)
 $(dotdot_objects) $(c_normal_objects): PRIVATE_ARM_CFLAGS := $(normal_objects_cflags)
+$(dotdot_objects) $(c_normal_objects): PRIVATE_COMPILER_ID := $(my_compiler)
 
 c_objects        := $(c_arm_objects) $(c_normal_objects)
 
@@ -1065,6 +1078,7 @@ ifneq ($(strip $(gen_c_objects)),)
 # TODO: support compiling certain generated files as arm.
 $(gen_c_objects): PRIVATE_ARM_MODE := $(normal_objects_mode)
 $(gen_c_objects): PRIVATE_ARM_CFLAGS := $(normal_objects_cflags)
+$(gen_c_objects): PRIVATE_COMPILER_ID := $(my_compiler)
 $(gen_c_objects): $(intermediates)/%.o: $(intermediates)/%.c $(yacc_cpps) $(proto_generated_headers) \
     $(my_additional_dependencies)
 	$(transform-$(PRIVATE_HOST)c-to-o)
